@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="id">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,7 +6,6 @@
 <title>Penilaian Ekstrakurikuler</title>
 
 <style>
-
 body{
   font-family:system-ui;
   margin:0;
@@ -39,6 +37,7 @@ select{
 
 #students{
   padding:10px;
+  padding-bottom:80px; /* Space for fixed button */
 }
 
 .card{
@@ -79,6 +78,17 @@ select{
   outline:none;
 }
 
+/* Status indicators */
+.nilai.filled{
+  background:#e8f5e9;
+  border-color:#4caf50;
+}
+
+.nilai.empty{
+  background:#fff3e0;
+  border-color:#ff9800;
+}
+
 #save{
   position:fixed;
   bottom:0;
@@ -88,12 +98,14 @@ select{
   border:none;
   font-size:18px;
   color:white;
-  background:#9aa0a6;
+  background:#574303; /* Always active color */
+  cursor:pointer;
 }
 
-#save.active{
-  background:#574303;
+#save:active{
+  background:#3d2f02;
 }
+
 #loading{
   position:fixed;
   inset:0;
@@ -133,6 +145,16 @@ select{
   color:#333;
 }
 
+/* Stats bar */
+#stats{
+  padding:10px;
+  background:#fff;
+  margin:10px;
+  border-radius:10px;
+  font-size:14px;
+  color:#666;
+  display:none;
+}
 </style>
 
 </head>
@@ -147,13 +169,16 @@ select{
   </select>
 </div>
 
+<div id="stats"></div>
+
 <div id="students"></div>
 
 <button id="save">Simpan Nilai</button>
+
 <div id="loading">
   <div class="loaderBox">
     <div class="spinner"></div>
-    <div class="text">Mengirim nilai...</div>
+    <div class="text" id="loadingText">Memuat data...</div>
   </div>
 </div>
 
@@ -164,73 +189,9 @@ const API="https://script.google.com/macros/s/AKfycby2yGsVGfEp5A0c6wHZSKawHqifAL
 let allData=[];
 let filtered=[];
 
-// LOAD DATA
-async function init(){
-  const res=await fetch(API);
-  allData=await res.json();
-
-  const ekstraSet=new Set(allData.map(s=>s.ekstra));
-
-  const select=document.getElementById("ekstraSelect");
-  ekstraSet.forEach(e=>{
-    const opt=document.createElement("option");
-    opt.value=e;
-    opt.textContent=e;
-    select.appendChild(opt);
-  });
-}
-
-document.getElementById("ekstraSelect").onchange=()=>{
-  const val=ekstraSelect.value;
-  filtered=allData.filter(s=>s.ekstra===val);
-  renderStudents();
-};
-
-function renderStudents(){
-
-  const container=document.getElementById("students");
-  container.innerHTML="";
-
-  filtered.forEach((s,i)=>{
-
-    const div=document.createElement("div");
-    div.className="card";
-
-    div.innerHTML=`
-      <div class="row">
-        <div>
-          <div class="nama">${s.nama}</div>
-          <div class="kelas">${s.kelas}</div>
-        </div>
-        <input type="number" min="0" max="100" class="nilai" data-i="${i}">
-      </div>
-    `;
-
-    container.appendChild(div);
-  });
-
-  attachAutoNext();
-}
-
-// AUTO MOVE
-function attachAutoNext(){
-
-  const inputs=document.querySelectorAll(".nilai");
-
-  inputs.forEach((input,index)=>{
-
-    input.oninput=()=>{
-      checkComplete();
-
-      const val=input.value;
-      if(val>=0 && val<=100 && val.length>=2){
-        if(inputs[index+1]) inputs[index+1].focus();
-      }
-    };
-
-  });
-}
-function showLoading(){
+// SHOW LOADING with custom text
+function showLoading(text){
+  document.getElementById("loadingText").textContent = text || "Memuat...";
   document.getElementById("loading").style.display="flex";
 }
 
@@ -238,33 +199,131 @@ function hideLoading(){
   document.getElementById("loading").style.display="none";
 }
 
-// SAVE BUTTON STATE
-function checkComplete(){
-  const inputs=document.querySelectorAll(".nilai");
-  const filled=[...inputs].every(i=>i.value!=="");
+// LOAD DATA
+async function init(){
+  showLoading("Memuat data siswa..."); // << CHANGED: Loading text for initial load
+  try {
+    const res=await fetch(API);
+    allData=await res.json();
 
-  const btn=document.getElementById("save");
-  if(filled) btn.classList.add("active");
-  else btn.classList.remove("active");
+    const ekstraSet=new Set(allData.map(s=>s.ekstra));
+
+    const select=document.getElementById("ekstraSelect");
+    ekstraSet.forEach(e=>{
+      const opt=document.createElement("option");
+      opt.value=e;
+      opt.textContent=e;
+      select.appendChild(opt);
+    });
+  } catch(err) {
+    alert("Gagal memuat data dari server");
+  } finally {
+    hideLoading();
+  }
 }
 
-// SAVE ALL
+document.getElementById("ekstraSelect").onchange=()=>{
+  const val=ekstraSelect.value;
+  filtered=allData.filter(s=>s.ekstra===val);
+  renderStudents();
+  updateStats();
+};
+
+function renderStudents(){
+  const container=document.getElementById("students");
+  container.innerHTML="";
+
+  if(filtered.length === 0){
+    container.innerHTML='<div style="text-align:center;padding:40px;color:#999;">Pilih ekstrakurikuler terlebih dahulu</div>';
+    document.getElementById("stats").style.display = "none";
+    return;
+  }
+
+  filtered.forEach((s,i)=>{
+    const div=document.createElement("div");
+    div.className="card";
+
+    // Check if nilai exists and is not empty/null/undefined
+    const existingNilai = s.nilai !== undefined && s.nilai !== null && s.nilai !== "" ? s.nilai : "";
+    const isFilled = existingNilai !== "";
+
+    div.innerHTML=`
+      <div class="row">
+        <div>
+          <div class="nama">${s.nama}</div>
+          <div class="kelas">${s.kelas}</div>
+        </div>
+        <input type="number" min="0" max="100" class="nilai ${isFilled ? 'filled' : 'empty'}" 
+               data-i="${i}" value="${existingNilai}" placeholder="-">
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+
+  attachAutoNext();
+  updateStats();
+}
+
+// Update statistics
+function updateStats(){
+  const inputs = document.querySelectorAll(".nilai");
+  if(inputs.length === 0) return;
+  
+  const filled = [...inputs].filter(i => i.value !== "").length;
+  const total = inputs.length;
+  
+  const statsDiv = document.getElementById("stats");
+  statsDiv.style.display = "block";
+  statsDiv.innerHTML = `Sudah dinilai: <strong>${filled}</strong> dari <strong>${total}</strong> siswa`;
+}
+
+// AUTO MOVE
+function attachAutoNext(){
+  const inputs=document.querySelectorAll(".nilai");
+
+  inputs.forEach((input,index)=>{
+    input.oninput=()=>{
+      // Update visual status
+      if(input.value !== ""){
+        input.classList.remove("empty");
+        input.classList.add("filled");
+      } else {
+        input.classList.remove("filled");
+        input.classList.add("empty");
+      }
+      updateStats();
+
+      // Auto next when 2 digits entered
+      const val=input.value;
+      if(val>=0 && val<=100 && val.length>=2){
+        if(inputs[index+1]) inputs[index+1].focus();
+      }
+    };
+    
+    // Also update on blur (when leaving field)
+    input.onblur = () => {
+      updateStats();
+    };
+  });
+}
+
+// SAVE ALL - Now always active, allows partial saves
 document.getElementById("save").onclick=async()=>{
-
-  const btn=document.getElementById("save");
-  if(!btn.classList.contains("active")) return;
-
-  showLoading();   // <<< LOCK SCREEN
+  
+  showLoading("Menyimpan nilai..."); // << CHANGED: Different text for saving
 
   const inputs=document.querySelectorAll(".nilai");
 
+  // Send all data, including empty values (as null or empty string)
   const payload=filtered.map((s,i)=>({
     nama:s.nama,
-    nilai:inputs[i].value
+    kelas:s.kelas,
+    ekstra:s.ekstra,
+    nilai:inputs[i].value === "" ? null : parseInt(inputs[i].value)
   }));
 
   try{
-
     const res=await fetch(API,{
       method:"POST",
       headers:{
@@ -276,12 +335,17 @@ document.getElementById("save").onclick=async()=>{
     const r=await res.json();
 
     hideLoading();
-    alert(r.message || "Nilai berhasil disimpan");
+    
+    // Update local data with saved values
+    filtered.forEach((s,i)=>{
+      s.nilai = inputs[i].value;
+    });
+    
+    alert(r.message || `Nilai berhasil disimpan! ${payload.filter(p => p.nilai !== null).length} data tersimpan.`);
 
   }catch(err){
-
     hideLoading();
-    alert("Koneksi ke server gagal");
+    alert("Koneksi ke server gagal: " + err.message);
   }
 };
 
