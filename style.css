@@ -6,15 +6,15 @@
 }
 
 :root {
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --bg: #0f0f0f;
-  --card-bg: #1a1a1a;
-  --text: #ffffff;
-  --text-secondary: #a1a1aa;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  --primary: #f2720d;
+  --primary-dark: #d65a0a;
+  --bg: #ed650a;
+  --card-bg: #904a03;
+  --text: #f2f0f0;
+  --text-secondary: #fafaf9;
+  --success: #e8e3e0;
+  --warning: #d4a574;
+  --danger: #8B3A1A;
 }
 
 html, body {
@@ -23,7 +23,6 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  touch-action: none;
 }
 
 /* ===== LOGIN SCREEN ===== */
@@ -34,7 +33,7 @@ html, body {
   justify-content: center;
   height: 100vh;
   padding: 20px;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(135deg, #301e02 0%, #f07e05 100%);
 }
 
 .login-logo {
@@ -47,6 +46,7 @@ html, body {
   font-weight: 700;
   margin-bottom: 8px;
   text-align: center;
+  color: var(--text);
 }
 
 .login-subtitle {
@@ -60,20 +60,21 @@ html, body {
   width: 100%;
   max-width: 300px;
   padding: 16px 20px;
-  border: 2px solid rgba(255,255,255,0.1);
+  border: 2px solid rgba(0, 0, 0, 0.727);
   border-radius: 12px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(240, 229, 229, 0.999);
   color: var(--text);
   font-size: 18px;
   text-align: center;
   letter-spacing: 2px;
   margin-bottom: 16px;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, background 0.3s;
 }
 
 .password-input:focus {
   outline: none;
   border-color: var(--primary);
+  background: rgba(224, 145, 70, 0.979);
 }
 
 .login-btn {
@@ -83,7 +84,7 @@ html, body {
   border: none;
   border-radius: 12px;
   background: var(--primary);
-  color: white;
+  color: rgb(255, 255, 255);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -115,12 +116,13 @@ html, body {
   justify-content: center;
   height: 100vh;
   padding: 20px;
+  background: var(--bg);
 }
 
 .spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid rgba(255,255,255,0.1);
+  border: 4px solid rgba(0,0,0,0.08);
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -140,7 +142,7 @@ html, body {
 .loading-progress {
   width: 200px;
   height: 4px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.08);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -166,6 +168,7 @@ html, body {
   position: relative;
   overflow: hidden;
   background: var(--bg);
+  touch-action: none;
 }
 
 .reel-container {
@@ -174,7 +177,7 @@ html, body {
   position: relative;
 }
 
-/* ===== TINDER-STYLE CARD (MOBILE-FIRST) ===== */
+/* ===== TINDER-STYLE CARD ===== */
 .student-card {
   position: absolute;
   top: 50%;
@@ -186,7 +189,7 @@ html, body {
   background: var(--card-bg);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06);
   display: flex;
   flex-direction: column;
   transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
@@ -210,7 +213,7 @@ html, body {
   width: 100%;
   height: 78%;
   min-height: 0;
-  background: #000;
+  background: #d90c0c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -232,7 +235,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f0f 100%);
+  background: linear-gradient(135deg, #f5ebe0 0%, #faf8f5 100%);
   font-size: 64px;
 }
 
@@ -247,6 +250,11 @@ html, body {
   z-index: 2;
 }
 
+.photo-overlay .student-name,
+.photo-overlay .student-class {
+  color: #ffffff;
+}
+
 /* Top progress bar on card */
 .card-progress {
   position: absolute;
@@ -254,7 +262,7 @@ html, body {
   left: 0;
   right: 0;
   height: 3px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.06);
   z-index: 6;
   display: flex;
   gap: 3px;
@@ -265,7 +273,7 @@ html, body {
   flex: 1;
   height: 3px;
   border-radius: 2px;
-  background: rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.1);
   transition: background 0.3s;
 }
 
@@ -289,6 +297,7 @@ html, body {
   z-index: 5;
   backdrop-filter: blur(6px);
   letter-spacing: 0.5px;
+  color: #ffffff;
 }
 
 .student-name {
@@ -318,7 +327,7 @@ html, body {
   gap: 8px;
   flex-shrink: 0;
   background: var(--card-bg);
-  border-top: 1px solid rgba(255,255,255,0.04);
+  border-top: 1px solid rgba(0,0,0,0.06);
 }
 
 .score-label {
@@ -332,9 +341,9 @@ html, body {
 .score-input {
   width: 140px;
   padding: 14px 18px;
-  border: 2.5px solid rgba(255,255,255,0.1);
+  border: 2.5px solid rgba(0,0,0,0.08);
   border-radius: 50px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(231, 6, 6, 0.986);
   color: var(--text);
   font-size: 24px;
   font-weight: 800;
@@ -348,20 +357,20 @@ html, body {
   outline: none;
   border-color: var(--primary);
   transform: scale(1.08);
-  background: rgba(255,255,255,0.08);
-  box-shadow: 0 0 24px rgba(99,102,241,0.25), 0 4px 12px rgba(0,0,0,0.3);
+  background: rgba(242,114,13,0.04);
+  box-shadow: 0 0 24px rgba(242, 112, 13, 0.799), 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .score-input.has-value {
   border-color: var(--success);
   color: var(--success);
-  background: rgba(34,197,94,0.08);
+  background: rgba(222, 207, 200, 0.06);
 }
 
 .score-input.existing {
   border-color: var(--warning);
   color: var(--warning);
-  background: rgba(245,158,11,0.08);
+  background: rgba(212,165,116,0.08);
 }
 
 .score-hint {
@@ -378,7 +387,7 @@ html, body {
   transform: translateX(-50%);
   padding: 6px 14px;
   border-radius: 20px;
-  background: rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.08);
   backdrop-filter: blur(10px);
   font-size: 12px;
   font-weight: 600;
@@ -386,6 +395,7 @@ html, body {
   transition: opacity 0.3s;
   pointer-events: none;
   z-index: 10;
+  color: var(--text);
 }
 
 .nav-hint.show {
@@ -420,13 +430,15 @@ html, body {
   display: none;
   height: 100vh;
   flex-direction: column;
-  background: var(--bg);
+  background: #ffffff;
+  overflow: hidden;
 }
 
 .summary-header {
   padding: 20px;
-  background: var(--card-bg);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: #f17f05;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
 }
 
 .summary-title {
@@ -443,6 +455,7 @@ html, body {
 .summary-list {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 12px;
 }
 
@@ -451,9 +464,10 @@ html, body {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: var(--card-bg);
+  background: #c76905;
   border-radius: 12px;
   margin-bottom: 8px;
+  border: 1px solid rgba(0,0,0,0.06);
 }
 
 .summary-photo {
@@ -461,7 +475,7 @@ html, body {
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
-  background: #333;
+  background: #f5ebe0;
 }
 
 .summary-info {
@@ -481,9 +495,9 @@ html, body {
 .summary-score-input {
   width: 64px;
   padding: 8px;
-  border: 2px solid rgba(255,255,255,0.1);
+  border: 2px solid rgba(0,0,0,0.08);
   border-radius: 8px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(0,0,0,0.03);
   color: var(--text);
   font-size: 16px;
   font-weight: 700;
@@ -501,10 +515,11 @@ html, body {
 
 .summary-actions {
   padding: 16px 20px 32px;
-  background: var(--card-bg);
-  border-top: 1px solid rgba(255,255,255,0.05);
+  background: #c76905;
+  border-top: 1px solid rgba(0,0,0,0.06);
   display: flex;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .btn {
@@ -523,7 +538,7 @@ html, body {
 }
 
 .btn-secondary {
-  background: rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.06);
   color: var(--text);
 }
 
@@ -551,7 +566,8 @@ html, body {
   font-weight: 500;
   z-index: 1000;
   transition: transform 0.3s;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  border: 1px solid rgba(0,0,0,0.06);
 }
 
 .toast.show {
