@@ -29,6 +29,61 @@ let scores = {};
 let touchStartY = 0;
 let touchStartX = 0;
 let isSwiping = false;
+let isAnimating = false;
+
+// ===== SOUND EFFECTS =====
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type) {
+  try {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+    if (type === 'next') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.exponentialRampToValueAtTime(900, now + 0.08);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.start(now);
+      osc.stop(now + 0.12);
+    } else if (type === 'prev') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(500, now);
+      osc.frequency.exponentialRampToValueAtTime(350, now + 0.08);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.start(now);
+      osc.stop(now + 0.12);
+    } else if (type === 'summary') {
+      // Two-tone success chord
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523, now);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc.start(now);
+      osc.stop(now + 0.3);
+
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(659, now + 0.05);
+      gain2.gain.setValueAtTime(0.12, now + 0.05);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc2.start(now + 0.05);
+      osc2.stop(now + 0.35);
+    }
+  } catch (e) {
+    // Audio not supported, silently fail
+  }
+}
 
 // ===== LOGIN =====
 function handleLogin() {
@@ -227,11 +282,53 @@ function handleScoreInput(idx, value) {
 // ===== SWIPE NAVIGATION =====
 function setupSwipe() {
   const container = document.getElementById('gradingScreen');
+  let currentCard = null;
+  let nextCard = null;
+  let prevCard = null;
+
+  function getCards() {
+    currentCard = document.querySelector('.student-card.active');
+    nextCard = document.querySelector('.student-card.next');
+    prevCard = document.querySelector('.student-card.prev');
+  }
 
   container.addEventListener('touchstart', (e) => {
+    if (isAnimating) return;
     touchStartY = e.touches[0].clientY;
     touchStartX = e.touches[0].clientX;
     isSwiping = true;
+    getCards();
+    if (currentCard) currentCard.classList.add('dragging');
+  }, { passive: true });
+
+  container.addEventListener('touchmove', (e) => {
+    if (!isSwiping || isAnimating) return;
+    const touchY = e.touches[0].clientY;
+    const diff = touchStartY - touchY;
+    const absDiff = Math.abs(diff);
+
+    if (currentCard) {
+      currentCard.style.setProperty('--drag-y', absDiff + 'px');
+      if (diff > 0) {
+        currentCard.classList.add('drag-up');
+        currentCard.classList.remove('drag-down');
+        if (nextCard) {
+          const scale = 0.92 + Math.min(absDiff / 400, 0.08);
+          const opacity = 0.6 + Math.min(absDiff / 300, 0.4);
+          nextCard.style.transform = `translate(-50%, -50%) scale(${scale})`;
+          nextCard.style.opacity = opacity;
+        }
+      } else {
+        currentCard.classList.add('drag-down');
+        currentCard.classList.remove('drag-up');
+        if (prevCard) {
+          const scale = 0.92 + Math.min(absDiff / 400, 0.08);
+          const opacity = 0.6 + Math.min(absDiff / 300, 0.4);
+          prevCard.style.transform = `translate(-50%, -50%) scale(${scale})`;
+          prevCard.style.opacity = opacity;
+        }
+      }
+    }
   }, { passive: true });
 
   container.addEventListener('touchend', (e) => {
@@ -240,13 +337,32 @@ function setupSwipe() {
 
     const touchEndY = e.changedTouches[0].clientY;
     const diff = touchStartY - touchEndY;
-    const threshold = 50;
+    const threshold = 80;
+
+    if (currentCard) {
+      currentCard.classList.remove('dragging', 'drag-up', 'drag-down');
+      currentCard.style.removeProperty('--drag-y');
+    }
 
     if (Math.abs(diff) > threshold) {
       if (diff > 0) {
         goNext();
       } else {
         goPrev();
+      }
+    } else {
+      // Snap back
+      if (currentCard) {
+        currentCard.style.transform = '';
+        currentCard.style.transition = '';
+      }
+      if (nextCard) {
+        nextCard.style.transform = '';
+        nextCard.style.opacity = '';
+      }
+      if (prevCard) {
+        prevCard.style.transform = '';
+        prevCard.style.opacity = '';
       }
     }
 
@@ -255,6 +371,7 @@ function setupSwipe() {
 
   document.addEventListener('keydown', (e) => {
     if (document.getElementById('gradingScreen').style.display !== 'block') return;
+    if (isAnimating) return;
 
     if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
       e.preventDefault();
@@ -268,13 +385,33 @@ function setupSwipe() {
 
 function goNext() {
   if (currentIndex >= students.length - 1) {
+    playSound('summary');
     showSummary();
     return;
   }
 
+  if (isAnimating) return;
+  isAnimating = true;
+  playSound('next');
   showSwipeHint('down');
-  currentIndex++;
-  updateCards();
+
+  const currentCard = document.querySelector('.student-card.active');
+  const nextCard = document.querySelector('.student-card.next');
+
+  if (currentCard) {
+    currentCard.classList.add('swipe-out-up');
+    currentCard.classList.remove('active');
+  }
+  if (nextCard) {
+    nextCard.classList.remove('next');
+    nextCard.classList.add('swipe-in');
+  }
+
+  setTimeout(() => {
+    currentIndex++;
+    updateCards();
+    isAnimating = false;
+  }, 380);
 }
 
 function goPrev() {
@@ -283,9 +420,28 @@ function goPrev() {
     return;
   }
 
+  if (isAnimating) return;
+  isAnimating = true;
+  playSound('prev');
   showSwipeHint('up');
-  currentIndex--;
-  updateCards();
+
+  const currentCard = document.querySelector('.student-card.active');
+  const prevCard = document.querySelector('.student-card.prev');
+
+  if (currentCard) {
+    currentCard.classList.add('swipe-out-down');
+    currentCard.classList.remove('active');
+  }
+  if (prevCard) {
+    prevCard.classList.remove('prev');
+    prevCard.classList.add('swipe-in');
+  }
+
+  setTimeout(() => {
+    currentIndex--;
+    updateCards();
+    isAnimating = false;
+  }, 380);
 }
 
 function showSwipeHint(direction) {
