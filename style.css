@@ -343,8 +343,8 @@ html, body {
   padding: 14px 18px;
   border: 2.5px solid rgba(0,0,0,0.08);
   border-radius: 50px;
-  background: rgba(231, 6, 6, 0.986);
-  color: var(--text);
+  background: rgba(243, 144, 5, 0.986);
+  color: #f2f0f0;
   font-size: 24px;
   font-weight: 800;
   text-align: center;
@@ -363,7 +363,7 @@ html, body {
 
 .score-input.has-value {
   border-color: var(--success);
-  color: var(--success);
+  color: #fff;
   background: rgba(222, 207, 200, 0.06);
 }
 
