@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Sistem Penilaian Ekstrakurikuler</title>
+  <link rel="stylesheet" href="style.css">
+<base target="_blank">
+</head>
+<body>
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div id="loginScreen">
+    <div class="login-logo">🎯</div>
+    <div class="login-title">Penilaian Ekstrakurikuler</div>
+    <div class="login-subtitle">Masukkan kode akses pembina</div>
+    <input 
+      type="password" 
+      id="passwordInput" 
+      class="password-input" 
+      placeholder="Kode Akses"
+      maxlength="20"
+      autocomplete="off"
+    >
+    <button class="login-btn" onclick="handleLogin()">Masuk</button>
+    <div class="login-error" id="loginError">Kode akses tidak valid</div>
+  </div>
+
+  <!-- ===== LOADING SCREEN ===== -->
+  <div id="loadingScreen">
+    <div class="spinner"></div>
+    <div class="loading-text">Memuat data siswa...</div>
+    <div class="loading-progress">
+      <div class="loading-bar" id="loadingBar"></div>
+    </div>
+    <div class="loading-status" id="loadingStatus">0%</div>
+  </div>
+
+  <!-- ===== GRADING SCREEN ===== -->
+  <div id="gradingScreen">
+    <div class="reel-container" id="reelContainer"></div>
+    <div class="nav-hint top" id="swipeUpHint">↑ Sebelumnya</div>
+    <div class="nav-hint bottom" id="swipeDownHint">↓ Selanjutnya</div>
+  </div>
+
+  <!-- ===== SUMMARY SCREEN ===== -->
+  <div id="summaryScreen">
+    <div class="summary-header">
+      <div class="summary-title">Ringkasan Penilaian</div>
+      <div class="summary-subtitle" id="summarySubtitle">Periksa kembali sebelum kirim</div>
+    </div>
+    <div class="summary-list" id="summaryList"></div>
+    <div class="summary-actions">
+      <button class="btn btn-secondary" onclick="backToGrading()">Kembali</button>
+      <button class="btn btn-primary" onclick="submitScores()">Kirim Nilai</button>
+    </div>
+  </div>
+
+  <!-- ===== TOAST ===== -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
