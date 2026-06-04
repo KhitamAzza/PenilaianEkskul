@@ -222,7 +222,7 @@ function renderCard(offset) {
       </div>
     </div>
     <div class="score-section">
-      <div class="score-label">Nilai Sikap</div>
+      <div class="score-label">Nilai ekstrakurikuler</div>
       <input 
         type="number" 
         class="score-input ${inputClass}" 
