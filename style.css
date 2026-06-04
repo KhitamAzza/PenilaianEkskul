@@ -428,7 +428,11 @@ html, body {
 /* ===== SUMMARY SCREEN ===== */
 #summaryScreen {
   display: none;
-  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   flex-direction: column;
   background: #ffffff;
   overflow: hidden;
@@ -454,6 +458,7 @@ html, body {
 
 .summary-list {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 12px;
@@ -514,7 +519,7 @@ html, body {
 }
 
 .summary-actions {
-  padding: 16px 20px 32px;
+  padding: 16px 20px max(32px, env(safe-area-inset-bottom));
   background: #c76905;
   border-top: 1px solid rgba(0,0,0,0.06);
   display: flex;
